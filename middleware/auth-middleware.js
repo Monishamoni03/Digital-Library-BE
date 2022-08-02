@@ -6,8 +6,8 @@ import * as status from '../constants/status-code';
 dotenv.config();
 
 const userAuthentication = async (req, res, next) => {
+    const token  = req.header('Authorization');
     try {
-        const token  = req.header('Authorization');
         if (!token)
             throw "Please login to access"
         const decodedData = jwt.verify(token, process.env.SECRET_KEY);

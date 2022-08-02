@@ -1,13 +1,11 @@
-import packages from 'mongoose';
-const { Schema, model } = packages;
+import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv';
 // import role from './role';
 
 dotenv.config();
-const schema = Schema;
 
-const userSchema = new schema({
+const userSchema = new mongoose.Schema({
     firstName: {
         type: String,
         required: true,
@@ -24,7 +22,7 @@ const userSchema = new schema({
         type: String,
         required: true,
     },
-    // roleId: {
+    // role: {
     //     type: packages.Types.ObjectId,
     //     ref : 'role',
     //     required: false
@@ -37,4 +35,4 @@ userSchema.methods.generateJsonWebToken = function(){
     });
 }
 
-export default model("User", userSchema);
+export default mongoose.model("User", userSchema);

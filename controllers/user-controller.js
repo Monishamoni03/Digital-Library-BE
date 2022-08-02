@@ -2,12 +2,17 @@ import User from '../model/user.js';
 import * as status from '../constants/status-code.js';
 import bcrypt from 'bcrypt';
 import tokenGenerate from '../utils/jwt-token';
+import registerValidation from '../validation/SchemaValidation';
+import loginValidation from '../validation/SchemaValidation';
+
 
 class UserController {
 
     registerUser = async (req, res) => {
         try {
-            const { firstName, lastName, email, password } = req.body;
+            let options = { abortEarly : false }
+            const registerData = await registerValidation.validateAsync(req.body, options)
+            const { firstName, lastName, email, password } = registerData;
             if (await User.findOne({ email: email })) {
                 throw "Existing email id"
             }
@@ -27,13 +32,15 @@ class UserController {
     }
 
     loginUser = async (req, res, next) => {
+        const { email, password } = req.body;
         try {
-            const { email, password } = req.body;
-            let user = await User.findOne({ email: email })
+            let options = { abortEarly : false }
+            const loginData = await loginValidation.validateAsync({email, password}, options)
+            let user = await User.findOne({ email: loginData.email })
 
             if (!user)
                 throw "This account does not exist"
-            if (!(bcrypt.compareSync(password, user.password)))
+            if (! (bcrypt.compareSync(loginData.password, user.password)))
                 throw "Incorrect password"
             const message = "Logged in successfully"
             tokenGenerate(user, status.SUCCESS, res, message)

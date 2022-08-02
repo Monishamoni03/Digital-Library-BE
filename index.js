@@ -1,10 +1,9 @@
 import express, { json } from 'express';
+import mongoose from 'mongoose';
 import userRouter from './routes/user-routes.js';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import packages from 'mongoose';
 
-const { connect } = packages;
 dotenv.config();
 
 const app = express();
@@ -12,7 +11,7 @@ app.use(json());
 app.use(cors());
 app.use("/users", userRouter);
 
-connect('mongodb://localhost:27017/Digital-Library')
+mongoose.connect(process.env.DB_CONNECT)
     .then(() => {
         console.log('Connected to MongoDB')
     })
