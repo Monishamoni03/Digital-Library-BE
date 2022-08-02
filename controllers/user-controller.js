@@ -32,10 +32,10 @@ class UserController {
             let user = await User.findOne({ email: email })
 
             if (!user)
-                throw "No account exist with this mail id"
+                throw "This account does not exist"
             if (!(bcrypt.compareSync(password, user.password)))
-                throw "Incorrect password, correct it"
-            const message = "Successfully Logged in"
+                throw "Incorrect password"
+            const message = "Logged in successfully"
             tokenGenerate(user, status.SUCCESS, res, message)
         } catch (err) {
             return res.status(status.NOT_FOUND).json({ error: err })

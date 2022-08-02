@@ -2,9 +2,9 @@ import express, { json } from 'express';
 import userRouter from './routes/user-routes.js';
 import dotenv from 'dotenv';
 import cors from 'cors';
-// import packages from 'mongoose';
+import packages from 'mongoose';
 
-// const { connect } = packages;
+const { connect } = packages;
 dotenv.config();
 
 const app = express();

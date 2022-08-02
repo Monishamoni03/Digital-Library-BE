@@ -1,5 +1,5 @@
-import pkg from 'mongoose';
-const { Schema, model } = pkg;
+import packages from 'mongoose';
+const { Schema, model } = packages;
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv';
 // import role from './role';
