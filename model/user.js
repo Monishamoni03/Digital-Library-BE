@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv';
-// import role from './role';
 
 dotenv.config();
 
@@ -23,14 +22,14 @@ const userSchema = new mongoose.Schema({
         required: true,
     },
     // role: {
-    //     type: packages.Types.ObjectId,
-    //     ref : 'role',
+    //     type: String,
+    //     default: 'admin',
     //     required: false
     // }
 });
 
 userSchema.methods.generateJsonWebToken = function(){
-    return jwt.sign({id:this._id},process.env.SECRET_KEY,{
+    return jwt.sign({id:this._id, role: this.role},process.env.SECRET_KEY,{
         expiresIn:'1h',
     });
 }

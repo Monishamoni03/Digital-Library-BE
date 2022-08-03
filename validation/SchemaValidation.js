@@ -1,4 +1,3 @@
-// const Joi = require('joi');
 import Joi from "joi";
 
 const registerValidation = Joi.object({
@@ -22,15 +21,15 @@ const registerValidation = Joi.object({
 
 })
 
-// const loginValidation = Joi.object({
-//     email: Joi.string()
-//                  .email()
-//                  .pattern(new RegExp(/^([a-zA-Z0-9_\.\-]+)@([a-zA-Z]+)\.([a-zA-Z]{2,5})$/))
-//                  .required(),
+const loginValidation = Joi.object({
+    email: Joi.string()
+                 .email()
+                 .pattern(new RegExp(/^([a-zA-Z0-9_\.\-]+)@([a-zA-Z]+)\.([a-zA-Z]{2,5})$/))
+                 .required(),
 
-//     password: Joi.string()
-//                  .pattern(new RegExp(/^[A-Za-z0-9]{6,15}$/))
-//                  .required()
-// })
+    password: Joi.string()
+                 .pattern(new RegExp(/^[A-Za-z0-9]{6,15}$/))
+                 .required()
+})
 
-export default registerValidation
+export default {registerValidation, loginValidation}
