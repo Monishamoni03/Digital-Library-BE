@@ -32,4 +32,8 @@ const loginValidation = Joi.object({
                  .required()
 })
 
+<<<<<<< HEAD
 export default {registerValidation, loginValidation}
+=======
+export default { registerValidation, loginValidation }
+>>>>>>> d4a91a0a205f5e8b566d550bc3fe272af6f9719f
