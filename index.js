@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import userRouter from './routes/user-routes.js';
+import bookRouter from './routes/book-routes.js';
 
 dotenv.config();
 
@@ -11,6 +12,7 @@ app.use(json());
 app.use(cors());
 
 app.use('/users', userRouter);
+app.use('/book', bookRouter);
 
 mongoose.connect(process.env.DB_CONNECT)
     .then(() => {
