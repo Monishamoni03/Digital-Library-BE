@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const userSchema = new mongoose.Schema({
+const schemaUser = new mongoose.Schema({
     firstName: {
         type: String,
         required: true,
@@ -21,17 +21,17 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    // role: {
-    //     type: String,
-    //     default: 'admin',
-    //     required: false
-    // }
+    roleId: {
+        type: mongoose.Types.ObjectId,
+        ref: 'role',    //admin or user
+        required: false
+    }
 });
 
-userSchema.methods.generateJsonWebToken = function(){
-    return jwt.sign({id:this._id, role: this.role},process.env.SECRET_KEY,{
+schemaUser.methods.generateJsonWebToken = function(){
+    return jwt.sign({id:this._id},process.env.SECRET_KEY,{
         expiresIn:'1h',
     });
 }
 
-export default mongoose.model("User", userSchema);
+export default mongoose.model("User", schemaUser);

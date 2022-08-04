@@ -12,7 +12,7 @@ app.use(json());
 app.use(cors());
 
 app.use('/users', userRouter);
-app.use('/book', bookRouter);
+app.use('/books', bookRouter);
 
 mongoose.connect(process.env.DB_CONNECT)
     .then(() => {
