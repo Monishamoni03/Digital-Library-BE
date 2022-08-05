@@ -39,7 +39,7 @@ class UserController {
              }
              errors.push(error)
              })
-             return res.status.INTERNAL_SERVER_ERROR.json(errors)
+           //  return res.status.INTERNAL_SERVER_ERROR.json({ error: err})
             }
             console.log("error : ",err)
             return res.status(status.INTERNAL_SERVER_ERROR).json({ error: err })
@@ -48,17 +48,17 @@ class UserController {
 
     //login
     loginUser = async (req, res) => {
-        const { email, password, role } = req.body;
+        const { email, password } = req.body;
         try {
-            let options = { abortEarly : false }
-            const loginData = await loginValidation.validateAsync({email, password}, options)
-            let roleId = await roleController.getRoleId(role, res);
-            let user = await User.findOne({ email: loginData.email })
+           // let options = { abortEarly : false }
+           // const loginData = await loginValidation.validateAsync({email, password}, options)
+           // let roleId = await roleController.getRoleId(role, res);
+            let user = await User.findOne({ email: email })
             if (!user)
                 throw "This account does not exist"
-            if (user.roleId.toString() !== roleId)
-                throw `This email not registered with ${role}'s role`
-            if (! (bcrypt.compareSync(loginData.password, user.password)))
+            // if (user.roleId.toString() !== roleId)
+            //     throw `This email not registered with ${role}'s role`
+            if (! (bcrypt.compareSync( password,user.password)))
                 throw "Incorrect password"
             tokenGenerate(user, status.SUCCESS, res, {message: 'Logged in successfully'})
         } catch (err) {

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -28,9 +28,9 @@ const schemaUser = new mongoose.Schema({
     }
 });
 
-schemaUser.methods.generateJsonWebToken = function(){
-    return jwt.sign({id:this._id},process.env.SECRET_KEY,{
-        expiresIn:'1h',
+schemaUser.methods.generateJsonWebToken = function() {
+    return jwt.sign({ id:this._id }, process.env.SECRET_KEY,{
+        expiresIn: '30m',
     });
 }
 

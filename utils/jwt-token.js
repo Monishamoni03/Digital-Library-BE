@@ -1,4 +1,4 @@
-const tokenGenerate = (user, statusCode, res, message) => {
+const sendRoleToken = (user) => {
     const token = user.generateJsonWebToken();
     const options = {
         expires: new Date(
@@ -7,11 +7,11 @@ const tokenGenerate = (user, statusCode, res, message) => {
         httpOnly: true
     };
 
-    return res.status(statusCode).cookie("token", token, options).json({
-        message: message,
+    return ({
         user,
         token,
-    })
-}
+        options
+   })
+};
 
-export default tokenGenerate;
+export default sendRoleToken;

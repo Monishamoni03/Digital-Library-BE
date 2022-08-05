@@ -9,11 +9,11 @@ const userAuthentication = async (req, res, next) => {
     const token  = req.header('Authorization');
     try {
         if (!token)
-            throw "Please login to access"
+            throw "Please login to access."
         const decodedData = jwt.verify(token, process.env.SECRET_KEY);
 
         if (req.params.id && decodedData.id !== req.params.id)
-            throw "No access to view other user details"
+            throw "No access to view other user details."
         req.User = await User.findById(decodedData.id)
         next()
     } catch (err) {
