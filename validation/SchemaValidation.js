@@ -10,7 +10,6 @@ const registerValidation = Joi.object({
         .pattern(new RegExp(regex.NAME_REGEX))
         .required(),
 
-
     email: Joi.string()
         .email()
         .pattern(new RegExp(regex.EMAIL_REGEX))

@@ -1,5 +1,6 @@
 import express, { json } from 'express';
 import mongoose from 'mongoose';
+import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import userRouter from './routes/user-routes.js';
@@ -8,6 +9,10 @@ import bookRouter from './routes/book-routes.js';
 dotenv.config();
 
 const app = express();
+
+app.use(bodyParser.json({extended: true }));
+app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use(json());
 app.use(cors());
 

@@ -16,6 +16,7 @@ const schemaUser = new mongoose.Schema({
     email: {
         type: String,
         required: true,
+        unique: true
     },
     password: {
         type: String,
@@ -23,7 +24,7 @@ const schemaUser = new mongoose.Schema({
     },
     roleId: {
         type: mongoose.Types.ObjectId,
-        ref: 'role',    //admin or user
+        ref: 'roles',    //admin or user
         required: false
     }
 });

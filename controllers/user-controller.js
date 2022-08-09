@@ -1,26 +1,29 @@
 import User from '../model/user.js';
 import * as status from '../constants/status-code.js';
 import bcrypt from 'bcrypt';
-import tokenGenerate from '../utils/jwt-token';
+import sendRoleToken from '../utils/jwt-token';
+import BaseController from './base-controller';
 import {registerValidation} from '../validation/SchemaValidation';
 import {loginValidation} from '../validation/SchemaValidation';
+
+const baseContoller = new BaseController();
+let user;
 
 class UserController {
 
     //register
     registerUser = async(req, res) => {
         try {
-            console.log("req : ",req.body)
             let options = { abortEarly : false }
             const registerData = await registerValidation.validateAsync(req.body, options)
-            console.log("registerData :",registerData)
-            const { firstName, lastName, email, password, role } = registerData;
-            let user = await User.findOne({ email: registerData.email })
+            const { firstName, lastName, email, password } = registerData;
+            user = await User.findOne({ email: registerData.email })
             if(user)
               throw "Existing email id"
 
             const hashedPassword = await bcrypt.hash(password, 10)
-            let roleId = await roleController.getRoleId(role, res);
+            let roleId = await baseContoller.getRoleId("user", res);
+            // console.log(roleId)
             user = new User({
                 firstName,
                 lastName,
@@ -29,8 +32,9 @@ class UserController {
                 roleId
             });
             await user.save();
-            return res.status.SUCCESS.json({ message: 'Successfully Registered', user })
+            return res.status(status.SUCCESS).json({ message: 'Successfully Registered' })    
         } catch (err) {
+            console.log(err); 
             if(err.isJoi === true) {
              const errors = []
              err.details.forEach(detail => {
@@ -39,7 +43,6 @@ class UserController {
              }
              errors.push(error)
              })
-           //  return res.status.INTERNAL_SERVER_ERROR.json({ error: err})
             }
             console.log("error : ",err)
             return res.status(status.INTERNAL_SERVER_ERROR).json({ error: err })
@@ -48,20 +51,24 @@ class UserController {
 
     //login
     loginUser = async (req, res) => {
-        const { email, password } = req.body;
         try {
-           // let options = { abortEarly : false }
-           // const loginData = await loginValidation.validateAsync({email, password}, options)
-           // let roleId = await roleController.getRoleId(role, res);
-            let user = await User.findOne({ email: email })
+            const { email, password, roles } = req.body;
+            console.log("REQ : ", req.body)
+            let options = { abortEarly : false }
+            const loginData = await loginValidation.validateAsync({email, password}, options)
+            let roleId = await baseContoller.getRoleId("user", res);
+            console.log(roleId);
+            let user = await User.findOne({ email: loginData.email })
+            console.log("pas", user.roleId.toString());
             if (!user)
                 throw "This account does not exist"
-            // if (user.roleId.toString() !== roleId)
-            //     throw `This email not registered with ${role}'s role`
-            if (! (bcrypt.compareSync( password,user.password)))
+            if (user.roleId.toString() !== roleId)
+                throw `This email not registered with ${roles}'s role`
+            if (! (bcrypt.compareSync( loginData.password,user.password)))
                 throw "Incorrect password"
-            tokenGenerate(user, status.SUCCESS, res, {message: 'Logged in successfully'})
+            sendRoleToken(user, status.SUCCESS, res, {message: 'Logged in successfully'})
         } catch (err) {
+            console.log("ERROR : ", err);
             return res.status(status.NOT_FOUND).json({ error: err })
         }
     }
@@ -69,11 +76,11 @@ class UserController {
     //view profile
     viewProfile = async (req, res) => {
         try {
-            const userId = req.params.id;
-            if(userId.length !== 20) 
+            const id = req.params.id;
+            if(id.length !== status.ID) 
                throw "Invalid ID"
-            let user = await User.findById(userId).populate({ path: 'roleId' })
-            if(user == null)
+            user = await User.findById(id).populate({ path: 'roleId' })
+            if(!user)
                 throw "No user found, wrong ID"
             return res.status(status.SUCCESS).json({ user })
         } catch (err) {
@@ -84,17 +91,17 @@ class UserController {
     //update profile
     updateProfile = async (req, res) => {
         try {
-            const userId = req.params.id;
-            if(userId.length !== 20) 
+            const id = req.params.id;
+            if(id.length !== status.ID) 
                throw "Invalid ID"
-            let user = await User.findById(userId)
-            if(user == null)
+            user = await User.findById(id)
+            if(!user)
                throw "Unable to update the profile"
             let options = { abortEarly: false }
             const updateData = await registerValidation.validateAsync(req.body, options)
             const { firstName, lastName, email, password } = updateData;
             const hashedPassword = await bcrypt.hash(password, 10);
-            user = await User.findByIdAndUpdate(userId, {
+            user = await User.findByIdAndUpdate(id, {
                 firstName,
                 lastName,
                 email,
@@ -110,11 +117,11 @@ class UserController {
     //delete profile
     deleteProfile = async (req, res) => {
         try {
-            const userId = req.params.id;
-            if(userId.length !== 20) 
+            const id = req.params.id;
+            if(id.length !== status.ID) 
                throw "Invalid ID"
-            let user = await User.findByIdAndDelete(userId)
-            if(user == null)
+            user = await User.findByIdAndDelete(id)
+            if(!user)
                throw "Unable to delete the profile"
             return res.status(status.SUCCESS).json({ message: 'Deleted Successfully'})
         } catch(err) {

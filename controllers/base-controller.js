@@ -1,21 +1,32 @@
 import Role from '../model/role';
-import User from '../model/user';
-import Book from '../model/book';
 import BookCategory from '../model/book-category';
 import * as status from '../constants/status-code';
 
+let role, category = [];
 class BaseController {
 
+    //role -> user / admin
     getRoleId = async (value, res) => {
         try {
-            let role = await Role.findOne({ roleId: value })
+            role = await Role.findOne({ roles: value })
             
             if (!role)
                 throw "Please mention the role"
             return role._id.toString()
-        }
-        catch (err) {
+        } catch (err) {
             return res.status(err);
+        }
+    }
+
+    //book category id
+    getBookCategoryId = async (value, res) => {
+        try {
+            category = await BookCategory.findOne({ category: value })
+            if(!category) 
+                throw "Book category not available"
+            return category._id.toString()
+        } catch (err) {
+            return res.status(status.NOT_FOUND).json({ error: err })
         }
     }
     
