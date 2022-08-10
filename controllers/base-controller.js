@@ -8,8 +8,8 @@ class BaseController {
     //role -> user / admin
     getRoleId = async (value, res) => {
         try {
-            role = await Role.findOne({ roles: value })
-            
+            const role = await Role.findOne({ name: value })
+            console.log("ROLE : ", role);
             if (!role)
                 throw "Please mention the role"
             return role._id.toString()

@@ -1,10 +1,11 @@
 import User from '../model/user.js';
+import Role from '../model/role'
 import * as status from '../constants/status-code.js';
 import bcrypt from 'bcrypt';
 import sendRoleToken from '../utils/jwt-token';
 import BaseController from './base-controller';
-import {registerValidation} from '../validation/SchemaValidation';
-import {loginValidation} from '../validation/SchemaValidation';
+import {registerValidation} from '../validation/UserValidationSchema';
+import {loginValidation} from '../validation/UserValidationSchema';
 
 const baseContoller = new BaseController();
 let user;
@@ -15,15 +16,18 @@ class UserController {
     registerUser = async(req, res) => {
         try {
             let options = { abortEarly : false }
-            const registerData = await registerValidation.validateAsync(req.body, options)
-            const { firstName, lastName, email, password } = registerData;
+            const { firstName, lastName, email, password, roles } = req.body
+            const registerData = await registerValidation.validateAsync({ firstName, lastName, email, password }, options)
+            // const { firstName, lastName, email, password } = registerData;
+            console.log("Reg", registerData);
             user = await User.findOne({ email: registerData.email })
             if(user)
               throw "Existing email id"
 
             const hashedPassword = await bcrypt.hash(password, 10)
-            let roleId = await baseContoller.getRoleId("user", res);
-            // console.log(roleId)
+            console.log(roles)
+            let roleId = await baseContoller.getRoleId(roles, res);
+            console.log(roleId)
             user = new User({
                 firstName,
                 lastName,
@@ -52,21 +56,24 @@ class UserController {
     //login
     loginUser = async (req, res) => {
         try {
-            const { email, password, roles } = req.body;
+            const { email, password } = req.body;
             console.log("REQ : ", req.body)
             let options = { abortEarly : false }
             const loginData = await loginValidation.validateAsync({email, password}, options)
-            let roleId = await baseContoller.getRoleId("user", res);
-            console.log(roleId);
+            // let roleId = await baseContoller.getRoleId(roles, res);
+            // console.log(roleId);
             let user = await User.findOne({ email: loginData.email })
-            console.log("pas", user.roleId.toString());
+            console.log("role", user.roleId);
+            let role = await Role.findById(user.roleId)
+            console.log("Role : ", role.name);
+            // console.log("pass", user.roleId.toString());
             if (!user)
                 throw "This account does not exist"
-            if (user.roleId.toString() !== roleId)
-                throw `This email not registered with ${roles}'s role`
+          //  if (user.roleId.() !== roleId)
+          //      throw `This email not registered with ${roles}'s role`
             if (! (bcrypt.compareSync( loginData.password,user.password)))
                 throw "Incorrect password"
-            sendRoleToken(user, status.SUCCESS, res, {message: 'Logged in successfully'})
+            sendRoleToken(user, status.SUCCESS, res, {message: 'Logged in successfully', role: role.name})
         } catch (err) {
             console.log("ERROR : ", err);
             return res.status(status.NOT_FOUND).json({ error: err })

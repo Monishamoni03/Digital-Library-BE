@@ -10,12 +10,16 @@ const userAuthentication = async (req, res, next) => {
         const token = req.header('Authorization');
         if (!token)
             throw "Please login to access."
-        const decodedData = jwt.verify(token, process.env.SECRET_KEY);
+        jwt.verify(token, process.env.SECRET_KEY, async (err, token) => {
+            const user = await User.findById(token.id)
+            req.user = user;
+            next();
+        });
 
-        if (req.params.id && decodedData.id !== req.params.id)
-            throw "You don't have access to view other user details."
-        req.User = await User.findById(decodedData.id)
-        next()
+        // if (req.params.id && decodedData.id !== req.params.id)
+        //     throw "You don't have access to view other user details."
+        // req.User = await User.findById(decodedData.id)
+        // next()
     } catch (err) {
         return res.status(status.UNAUTHORIZED).json({ error: err })
     }

@@ -1,6 +1,7 @@
 import express, { json } from 'express';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import userRouter from './routes/user-routes.js';
@@ -10,12 +11,14 @@ dotenv.config();
 
 const app = express();
 
+app.use(cookieParser());
 app.use(bodyParser.json({extended: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(json());
 app.use(cors());
 
+//routes
 app.use('/users', userRouter);
 app.use('/books', bookRouter);
 

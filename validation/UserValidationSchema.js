@@ -17,7 +17,13 @@ const registerValidation = Joi.object({
 
     password: Joi.string()
         .pattern(new RegExp(regex.PASSWORD_REGEX))
-        .required()
+        .required(),
+    confirmPassword: Joi.ref('password')
+        // .required(),
+
+    // roles: Joi.string()
+    //     .valid("admin","user")
+    //     .required()
 
 })
 

@@ -3,22 +3,18 @@ import autoIncrement from 'mongoose-auto-increment';
 
 const bookSchema = new mongoose.Schema({
 
-  bookName: String,
-  author: String,
-  category: String
-
-    // bookName: {
-    //   type: String,
-    //   required: true
-    // },
-    // author: {
-    //   type: String,
-    //   required: true
-    // },
-    // category: {
-    //   type: String,
-    //   reuired: true
-    // },
+    bookName: {
+      type: String,
+      required: true
+    },
+    author: {
+      type: String,
+      required: true
+    },
+    category: {
+      type: String,
+      reuired: true
+    },
     // bookCategoryId: {
     //   type: mongoose.Schema.Types.ObjectId,
     //   ref: 'Book Category'
