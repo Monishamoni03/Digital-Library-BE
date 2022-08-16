@@ -5,15 +5,15 @@ const bookSchema = new mongoose.Schema({
 
     bookName: {
       type: String,
-      required: true
+      // required: true
     },
     author: {
       type: String,
-      required: true
+      // required: true
     },
     category: {
       type: String,
-      reuired: true
+      // reuired: true
     },
     // bookCategoryId: {
     //   type: mongoose.Schema.Types.ObjectId,

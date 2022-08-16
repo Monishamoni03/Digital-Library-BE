@@ -2,7 +2,7 @@ import Role from '../model/role';
 import BookCategory from '../model/book-category';
 import * as status from '../constants/status-code';
 
-let role, category = [];
+let category;
 class BaseController {
 
     //role -> user / admin
@@ -23,7 +23,7 @@ class BaseController {
         try {
             category = await BookCategory.findOne({ category: value })
             if(!category) 
-                throw "Book category not available"
+                throw "This type of book category is not available"
             return category._id.toString()
         } catch (err) {
             return res.status(status.NOT_FOUND).json({ error: err })

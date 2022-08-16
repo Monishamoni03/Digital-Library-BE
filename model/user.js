@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const schemaUser = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
     firstName: {
         type: String,
         required: true,
@@ -33,10 +33,10 @@ const schemaUser = new mongoose.Schema({
     }
 });
 
-schemaUser.methods.generateJsonWebToken = function() {
+userSchema.methods.generateJsonWebToken = function() {
     return jwt.sign({ id:this._id }, process.env.SECRET_KEY,{
         expiresIn: '30m',
     });
 }
 
-export default mongoose.model("User", schemaUser);
+export default mongoose.model("User", userSchema);

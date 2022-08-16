@@ -2,10 +2,10 @@ import User from '../model/user.js';
 import Role from '../model/role'
 import * as status from '../constants/status-code.js';
 import bcrypt from 'bcrypt';
-import sendRoleToken from '../utils/jwt-token';
+import generateToken from '../utils/jwt-token';
 import BaseController from './base-controller';
-import {registerValidation} from '../validation/UserValidationSchema';
-import {loginValidation} from '../validation/UserValidationSchema';
+import { registerValidation } from '../validation/user-validation-schema';
+import { loginValidation } from '../validation/user-validation-schema';
 
 const baseContoller = new BaseController();
 let user;
@@ -16,39 +16,42 @@ class UserController {
     registerUser = async(req, res) => {
         try {
             let options = { abortEarly : false }
-            const { firstName, lastName, email, password, roles } = req.body
-            const registerData = await registerValidation.validateAsync({ firstName, lastName, email, password }, options)
-            // const { firstName, lastName, email, password } = registerData;
+            const roles = 'user'
+            const { firstName, lastName, email, password, confirmPassword } = req.body
+            const registerData = await registerValidation.validateAsync({ firstName, lastName, email, password, confirmPassword }, options)
             console.log("Reg", registerData);
             user = await User.findOne({ email: registerData.email })
             if(user)
               throw "Existing email id"
-
             const hashedPassword = await bcrypt.hash(password, 10)
-            console.log(roles)
+            const hashedconfirmPassword= await bcrypt.hash(confirmPassword, 10)
+            
             let roleId = await baseContoller.getRoleId(roles, res);
-            console.log(roleId)
+            let role = await Role.findById(roleId)
+            console.log("Role : ", role.name); 
             user = new User({
                 firstName,
                 lastName,
                 email,
                 password: hashedPassword,
+                confirmPassword: hashedconfirmPassword,
                 roleId
             });
             await user.save();
-            return res.status(status.SUCCESS).json({ message: 'Successfully Registered' })    
+            generateToken(user, status.SUCCESS, res, role.name, {message: 'Successfully Registered' })
+            // return res.status(status.SUCCESS).json({ message: 'Successfully Registered' })    
         } catch (err) {
-            console.log(err); 
-            if(err.isJoi === true) {
-             const errors = []
-             err.details.forEach(detail => {
-             let error = {
-                 [detail.path] : detail.message
-             }
-             errors.push(error)
-             })
-            }
-            console.log("error : ",err)
+            // console.log(err); 
+            // if(err.isJoi === true) {
+            //  const errors = []
+            //  err.details.forEach(detail => {
+            //  let error = {
+            //      [detail.path] : detail.message
+            //  }
+            //  errors.push(error)
+            //  })
+            // }
+            // console.log("error : ",err)
             return res.status(status.INTERNAL_SERVER_ERROR).json({ error: err })
         }
     }
@@ -60,20 +63,15 @@ class UserController {
             console.log("REQ : ", req.body)
             let options = { abortEarly : false }
             const loginData = await loginValidation.validateAsync({email, password}, options)
-            // let roleId = await baseContoller.getRoleId(roles, res);
-            // console.log(roleId);
             let user = await User.findOne({ email: loginData.email })
             console.log("role", user.roleId);
             let role = await Role.findById(user.roleId)
             console.log("Role : ", role.name);
-            // console.log("pass", user.roleId.toString());
             if (!user)
                 throw "This account does not exist"
-          //  if (user.roleId.() !== roleId)
-          //      throw `This email not registered with ${roles}'s role`
             if (! (bcrypt.compareSync( loginData.password,user.password)))
                 throw "Incorrect password"
-            sendRoleToken(user, status.SUCCESS, res, {message: 'Logged in successfully', role: role.name})
+            generateToken(user, status.SUCCESS, res, role.name, {message: 'Logged in successfully'})
         } catch (err) {
             console.log("ERROR : ", err);
             return res.status(status.NOT_FOUND).json({ error: err })

@@ -1,42 +1,19 @@
-const sendRoleToken = (user, statusCode, res) => {
-    const token = user.getJWTToken();
-    
+const generateToken = (user, statusCode, res, role, message) => {
+    const token = user.generateJsonWebToken();
     const options = {
-      expires: new Date(
-        Date.now() + 5 * 24 * 60 * 60 * 1000 
-      ),
-      httpOnly: true,
+        expires: new Date(
+            Date.now() + 60 * 60 * 1000  //cookie expire 
+        ),
+        httpOnly: true
     };
-  
-    res.status(statusCode).cookie("token", token, options).json({
-      success: true,
-      user,
-      token,
-    });
-  };
-  
-export default sendRoleToken;
-  
 
+    console.log("TOKEN ROLE : ", role);
 
+    return res.status(statusCode).cookie("token", token, options).json({
+        data: message,
+        role,
+        token,
+   })
+};
 
-
-
-// const sendRoleToken = (user, statusCode, res, message, role) => {
-//     const token = user.generateJsonWebToken();
-//     const options = {
-//         expires: new Date(
-//             Date.now() + 60 * 60 * 1000  //cookie expire
-//         ),
-//         httpOnly: true
-//     };
-
-//     return res.status(statusCode).cookie("token", token, options).json({
-//         message: message,
-//         user,
-//         role: role,
-//         token,
-//    })
-// };
-
-// export default sendRoleToken;
+export default generateToken;
