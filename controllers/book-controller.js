@@ -1,11 +1,12 @@
 import Book from '../model/book';
+import User from '../model/user';
 import * as status from '../constants/status-code.js';
 import Booking from '../model/bookings';
 import { bookValidation } from '../validation/book-validation-schema';
 
 class BookController {
 
-    //get all books 
+    //admin-> get all books 
     getBooks = async (req, res) => {
         try { 
             const books = await Book.find();
@@ -15,25 +16,26 @@ class BookController {
             res.status(status.NOT_FOUND).json({ message: error.message })
         } 
     }
-    //////////////////////////
-
+    
+    //admin-> add books
     addBook = async (req, res) => {
         try {
             let options = { abortEarly: false }
-            const { bookName, author, category } = req.body
-            const registerData = await bookValidation.validateAsync({ bookName, author, category }, options)
-            console.log("Reg", registerData);
+            const { bookName, author, category, description } = req.body
+            const registerData = await bookValidation.validateAsync({ bookName, author, category, description }, options)
+            console.log("Adding books", registerData);
             let book = await Book.findOne({ bookName: registerData.bookName })
             if (book)
                 throw "Existing book name"
             book = new Book({
                 bookName,
                 author,
-                category
+                category,
+                description
             });
            
             const newBook = new Book(book);
-            await newBook.save()
+            await newBook.save();
             return res.status(status.CREATED).json(newBook)    
         } catch (err) {
             console.log(err); 
@@ -41,7 +43,7 @@ class BookController {
              const errors = []
              err.details.forEach(detail => {
              let error = {
-                 [detail.path] : detail.message
+                [detail.path] : detail.message
              }
              errors.push(error)
              })
@@ -50,7 +52,6 @@ class BookController {
             return res.status(status.NOT_FOUND).json({ error: err })
         }
     }
-    //////////////////////////
 
     //add books ->  saving data of books in DB
     // addBook = async (req, res) => {
@@ -67,7 +68,7 @@ class BookController {
     //     }
     // }
 
-    //edit books
+    //admin-> edit books
     editBook = async (req, res) => {
         const book = req.body;
         const editBook = new Book(book);
@@ -83,9 +84,22 @@ class BookController {
         }
     }
 
-    //delete books
+    //admin-> delete books
     deleteBook = async (req, res) => {
         try {
+            // const userBookings = await Booking.find({ user : req.params.id }).populate( { path : 'book', path : 'user'})
+            // if(userBookings.length > 0)
+            //     throw "Book has been already booked by a user"
+            // let user = await Book.find({ _id: req.params.id });
+            // if(user.length > 0) 
+            //     throw "Book has been already by a user"
+            // if user added to my list, admin should not delete that user added book
+
+            // let existingUserBooking = await Booking.find({ user : req.body.user, book : req.body.book })
+            // if( existingUserBooking.length === 1)
+            //     throw "You can't delete. User added this book to their list"
+
+            //////////
             await Book.deleteOne({_id: req.params.id});
             res.status(status.SUCCESS).json("Book deleted successfully");
         } catch (error){
@@ -93,16 +107,17 @@ class BookController {
         }
     }
 
-    //get book based on id
+    //admin-> get book based on id
     getBookById = async (req, res) => {
         try {
             const book = await Book.findById(req.params.id);
             res.status(status.SUCCESS).json(book);
-        }catch( error ){
+        } catch( error ){
             res.status(status.NOT_FOUND).json({ message: error.message })
         }
-    }
-    //add book to list
+    } 
+
+    //user-> add book to list
     addBookToList = async (req, res) => {
         console.log("Req : ",req.body)
         try {
@@ -111,11 +126,11 @@ class BookController {
                 throw 'Already book has been added to your list'
             let existingBookings = await Booking.find({ book : req.body.book })
             if(existingBookings.length === 1)
-                throw 'Already book has been added by other user'
+                throw 'Already book has been added by other user. Kindly choose another book.'
             const userBooking = new Booking(req.body)
             await userBooking.save()
-            res.status(status.SUCCESS).json({message : 'succesfully book has been added to the list'})
-        }catch( error ){
+            res.status(status.SUCCESS).json({message : 'Successfully book has been added to your list'})
+        } catch( error ){
             res.status(status.NOT_FOUND).json({ message : error })
         }
         

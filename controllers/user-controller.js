@@ -1,14 +1,48 @@
 import User from '../model/user.js';
 import Role from '../model/role'
 import * as status from '../constants/status-code.js';
+import * as constants from '../constants/constants';
 import bcrypt from 'bcrypt';
 import generateToken from '../utils/jwt-token';
-import BaseController from './base-controller';
+// import BaseController from './base-controller';
+import AbstractBaseController from './base-controller';
 import { registerValidation } from '../validation/user-validation-schema';
 import { loginValidation } from '../validation/user-validation-schema';
 
-const baseContoller = new BaseController();
-let user;
+// const baseContoller = new BaseController();
+
+class BaseController extends AbstractBaseController {
+    constructor() {
+        super()
+    }
+
+    //role -> user / admin
+    getRoleId = async (value, res) => {
+        try {
+            const role = await Role.findOne({ name: value })
+            console.log("ROLE : ", role);
+            if (!role)
+                throw "Please mention the role"
+            return role._id.toString()
+        } catch (err) {
+            return res.status(err);
+        }
+    }
+
+    //book category id
+    getBookCategoryId = async (value, res) => {
+        try {
+            const category = await BookCategory.findOne({ category: value })
+            if (!category)
+                throw "This type of book category is not available"
+            return category._id.toString()
+        } catch (err) {
+            return res.status(status.NOT_FOUND).json({ error: err })
+        }
+    }
+}
+
+const baseContoller = new BaseController(); 
 
 class UserController {
 
@@ -16,19 +50,18 @@ class UserController {
     registerUser = async (req, res) => {
         try {
             let options = { abortEarly: false }
-            const roles = 'user'
             const { firstName, lastName, email, password, confirmPassword } = req.body
             const registerData = await registerValidation.validateAsync({ firstName, lastName, email, password, confirmPassword }, options)
             console.log("Reg", registerData);
-            user = await User.findOne({ email: registerData.email })
+            let user = await User.findOne({ email: registerData.email })
             if (user)
                 throw "Existing email id"
             const hashedPassword = await bcrypt.hash(password, 10)
             const hashedconfirmPassword = await bcrypt.hash(confirmPassword, 10)
 
-            let roleId = await baseContoller.getRoleId(roles, res);
+            let roleId = await baseContoller.getRoleId(constants.ROLES, res);
             let role = await Role.findById(roleId)
-            console.log("Role : ", role.name);
+            // console.log("Role : ", role.name);
             user = new User({
                 firstName,
                 lastName,
@@ -41,17 +74,17 @@ class UserController {
             generateToken(user, status.SUCCESS, res, role.name, { message: 'Successfully Registered' })
             // return res.status(status.SUCCESS).json({ message: 'Successfully Registered' })    
         } catch (err) {
-            console.log(err); 
-            if(err.isJoi === true) {
-             const errors = []
-             err.details.forEach(detail => {
-             let error = {
-                 [detail.path] : detail.message
-             }
-             errors.push(error)
-             })
+            console.log(err);
+            if (err.isJoi === true) {
+                const errors = []
+                err.details.forEach(detail => {
+                    let error = {
+                        [detail.path]: detail.message
+                    }
+                    errors.push(error)
+                })
             }
-            console.log("error : ",err)
+            console.log("error : ", err)
             return res.status(status.INTERNAL_SERVER_ERROR).json({ error: err })
         }
     }
@@ -63,14 +96,13 @@ class UserController {
             console.log("REQ : ", req.body)
             let options = { abortEarly: false }
             const loginData = await loginValidation.validateAsync({ email, password }, options)
-            let user = await User.findOne({ email: loginData.email })
+            const user = await User.findOne({ email: loginData.email })
 
             if (!user)
-                throw "Email not exist"
+                throw "Email does not exist"
 
-            // console.log("role", user.roleId);
             let role = await Role.findById(user.roleId)
-            console.log("Role : ", role.name);
+            // console.log("Role : ", role.name);
             if (!user)
                 throw "This account does not exist"
             if (!(bcrypt.compareSync(loginData.password, user.password)))
@@ -88,7 +120,7 @@ class UserController {
             const id = req.params.id;
             if (id.length !== status.ID)
                 throw "Invalid ID"
-            user = await User.findById(id).populate({ path: 'roleId' })
+            const user = await User.findById(id).populate({ path: 'roleId' })
             if (!user)
                 throw "No user found, wrong ID"
             return res.status(status.SUCCESS).json({ user })
@@ -103,7 +135,7 @@ class UserController {
             const id = req.params.id;
             if (id.length !== status.ID)
                 throw "Invalid ID"
-            user = await User.findById(id)
+            const user = await User.findById(id)
             if (!user)
                 throw "Unable to update the profile"
             let options = { abortEarly: false }
@@ -129,7 +161,7 @@ class UserController {
             const id = req.params.id;
             if (id.length !== status.ID)
                 throw "Invalid ID"
-            user = await User.findByIdAndDelete(id)
+            const user = await User.findByIdAndDelete(id)
             if (!user)
                 throw "Unable to delete the profile"
             return res.status(status.SUCCESS).json({ message: 'Deleted Successfully' })
