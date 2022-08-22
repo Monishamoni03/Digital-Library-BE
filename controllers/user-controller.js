@@ -5,7 +5,6 @@ import * as constants from '../constants/constants';
 import bcrypt from 'bcrypt';
 import generateToken from '../utils/jwt-token';
 import BaseController from './base-controller';
-// import AbstractBaseController from './base-controller';
 import { registerValidation } from '../validation/user-validation-schema';
 import { loginValidation } from '../validation/user-validation-schema';
 
@@ -13,7 +12,7 @@ const baseContoller = new BaseController();
 
 class UserController {
 
-    //register
+    //register -> user
     registerUser = async (req, res) => {
         try {
             let options = { abortEarly: false }
@@ -24,7 +23,7 @@ class UserController {
             if (user)
                 throw "Existing email id"
             const hashedPassword = await bcrypt.hash(password, 10)
-            const hashedconfirmPassword = await bcrypt.hash(confirmPassword, 10)
+            // const hashedconfirmPassword = await bcrypt.hash(confirmPassword, 10)
 
             let roleId = await baseContoller.getRoleId(constants.USER_ROLE, res);
             user = new User({
@@ -32,12 +31,11 @@ class UserController {
                 lastName,
                 email,
                 password: hashedPassword,
-                confirmPassword: hashedconfirmPassword,
+                // confirmPassword: hashedconfirmPassword,
                 roleId
             });
             await user.save();
-            generateToken(user, status.SUCCESS, res, constants.USER_ROLE, { message: 'Successfully Registered' })
-            // return res.status(status.SUCCESS).json({ message: 'Successfully Registered' })    
+            generateToken(user, status.SUCCESS, res, constants.USER_ROLE, { message: 'Successfully Registered' })  
         } catch (err) {
             console.log(err);
             if (err.isJoi === true) {
@@ -54,7 +52,7 @@ class UserController {
         }
     }
 
-    //login
+    //login -> admin/user
     loginUser = async (req, res) => {
         try {
             const { email, password } = req.body;

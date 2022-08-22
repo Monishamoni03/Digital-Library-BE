@@ -23,11 +23,11 @@ class BookingController {
         }
     }
 
-    //user-> remove from book list
+    //user-> remove from booking list
     removeBook = async (req, res) => {
         try {
             await Booking.deleteOne({_id: req.params.id});
-            res.status(status.SUCCESS).json("successfully book has been removed from your list");
+            res.status(status.SUCCESS).json("Successfully book has been removed from your list");
         } catch (error){
             res.status(status.NOT_FOUND).json({ message: error.message });     
         }

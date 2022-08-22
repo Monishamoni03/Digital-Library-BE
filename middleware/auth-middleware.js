@@ -12,7 +12,8 @@ const isAuthenticated = async (req, res, next) => {
         if (!token)
             throw "Please login to access."
         jwt.verify(token, process.env.SECRET_KEY, async (err, token) => {
-            const user = await User.findById(token.id)
+            // const user = await User.findById(token.id)
+            const user =  await User.find(token);
             req.user = user;
             next();
         });

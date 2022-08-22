@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema({
     },
     confirmPassword: {
         type: String,
-        required: true,
+        required: false,
     },
     roleId: {
         type: mongoose.Types.ObjectId,

@@ -7,7 +7,7 @@ const generateToken = (user, statusCode, res, role, message) => {
         httpOnly: true
     };
 
-    console.log("TOKEN ROLE : ", role);
+    console.log("TOKEN ROLE : ", role);    //user or admin
 
     return res.status(statusCode).cookie("token", token, options).json({
         data: message,
