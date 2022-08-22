@@ -3,7 +3,7 @@ import * as regex from '../constants/constants';
 
 const bookValidation = Joi.object({
     bookName: Joi.string()
-        .pattern(new RegExp(regex.NAME_REGEX))   
+        .pattern(new RegExp(regex.BOOKNAME_REGEX))   
         .required(),
 
     author: Joi.string()
@@ -15,7 +15,7 @@ const bookValidation = Joi.object({
         .required(),
         
     description: Joi.string()
-        //.pattern(new RegExp(regex.BOOKNAME_REGEX))
+        // .pattern(new RegExp(regex.BOOKNAME_REGEX))
         .required()
 }) 
 

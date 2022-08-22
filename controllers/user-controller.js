@@ -4,45 +4,12 @@ import * as status from '../constants/status-code.js';
 import * as constants from '../constants/constants';
 import bcrypt from 'bcrypt';
 import generateToken from '../utils/jwt-token';
-// import BaseController from './base-controller';
-import AbstractBaseController from './base-controller';
+import BaseController from './base-controller';
+// import AbstractBaseController from './base-controller';
 import { registerValidation } from '../validation/user-validation-schema';
 import { loginValidation } from '../validation/user-validation-schema';
 
-// const baseContoller = new BaseController();
-
-class BaseController extends AbstractBaseController {
-    constructor() {
-        super()
-    }
-
-    //role -> user / admin
-    getRoleId = async (value, res) => {
-        try {
-            const role = await Role.findOne({ name: value })
-            console.log("ROLE : ", role);
-            if (!role)
-                throw "Please mention the role"
-            return role._id.toString()
-        } catch (err) {
-            return res.status(err);
-        }
-    }
-
-    //book category id
-    getBookCategoryId = async (value, res) => {
-        try {
-            const category = await BookCategory.findOne({ category: value })
-            if (!category)
-                throw "This type of book category is not available"
-            return category._id.toString()
-        } catch (err) {
-            return res.status(status.NOT_FOUND).json({ error: err })
-        }
-    }
-}
-
-const baseContoller = new BaseController(); 
+const baseContoller = new BaseController();
 
 class UserController {
 
@@ -59,9 +26,7 @@ class UserController {
             const hashedPassword = await bcrypt.hash(password, 10)
             const hashedconfirmPassword = await bcrypt.hash(confirmPassword, 10)
 
-            let roleId = await baseContoller.getRoleId(constants.ROLES, res);
-            let role = await Role.findById(roleId)
-            // console.log("Role : ", role.name);
+            let roleId = await baseContoller.getRoleId(constants.USER_ROLE, res);
             user = new User({
                 firstName,
                 lastName,
@@ -71,7 +36,7 @@ class UserController {
                 roleId
             });
             await user.save();
-            generateToken(user, status.SUCCESS, res, role.name, { message: 'Successfully Registered' })
+            generateToken(user, status.SUCCESS, res, constants.USER_ROLE, { message: 'Successfully Registered' })
             // return res.status(status.SUCCESS).json({ message: 'Successfully Registered' })    
         } catch (err) {
             console.log(err);
@@ -100,11 +65,7 @@ class UserController {
 
             if (!user)
                 throw "Email does not exist"
-
-            let role = await Role.findById(user.roleId)
-            // console.log("Role : ", role.name);
-            if (!user)
-                throw "This account does not exist"
+            let role = await Role.findById(user.roleId);
             if (!(bcrypt.compareSync(loginData.password, user.password)))
                 throw "Incorrect password"
             generateToken(user, status.SUCCESS, res, role.name, { message: 'Logged in successfully' })
@@ -118,7 +79,7 @@ class UserController {
     viewProfile = async (req, res) => {
         try {
             const id = req.params.id;
-            if (id.length !== status.ID)
+            if (id.length !== status.OBJECT_ID)
                 throw "Invalid ID"
             const user = await User.findById(id).populate({ path: 'roleId' })
             if (!user)
@@ -133,20 +94,20 @@ class UserController {
     updateProfile = async (req, res) => {
         try {
             const id = req.params.id;
-            if (id.length !== status.ID)
+            if (id.length !== status.OBJECT_ID)
                 throw "Invalid ID"
             const user = await User.findById(id)
             if (!user)
                 throw "Unable to update the profile"
             let options = { abortEarly: false }
             const updateData = await registerValidation.validateAsync(req.body, options)
-            const { firstName, lastName, email, password } = updateData;
-            const hashedPassword = await bcrypt.hash(password, 10);
+            const { firstName, lastName, email } = updateData;
+            // const hashedPassword = await bcrypt.hash(password, 10);
             user = await User.findByIdAndUpdate(id, {
                 firstName,
                 lastName,
                 email,
-                password: hashedPassword
+                // password: hashedPassword
             })
             user = await user.save()
             return res.status(status.SUCCESS).json({ message: 'Updated Successfully' })
@@ -159,7 +120,7 @@ class UserController {
     deleteProfile = async (req, res) => {
         try {
             const id = req.params.id;
-            if (id.length !== status.ID)
+            if (id.length !== status.OBJECT_ID)
                 throw "Invalid ID"
             const user = await User.findByIdAndDelete(id)
             if (!user)
