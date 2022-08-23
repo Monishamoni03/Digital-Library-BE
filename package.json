@@ -24,7 +24,6 @@
     "mongoose-auto-increment": "^5.0.1",
     "node-modules": "^1.0.1",
     "nodemon": "^2.0.19",
-    "uuid": "^8.3.2",
     "validation-middleware": "^2.0.0"
   }
 }
