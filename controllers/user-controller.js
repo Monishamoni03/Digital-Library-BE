@@ -1,5 +1,5 @@
 import User from '../model/user.js';
-import Role from '../model/role'
+import Role from '../model/role';
 import * as status from '../constants/status-code.js';
 import * as constants from '../constants/constants';
 import bcrypt from 'bcrypt';
@@ -16,14 +16,12 @@ class UserController {
     registerUser = async (req, res) => {
         try {
             let options = { abortEarly: false }
-            const { firstName, lastName, email, password, confirmPassword } = req.body
-            const registerData = await registerValidation.validateAsync({ firstName, lastName, email, password, confirmPassword }, options)
-            console.log("Reg", registerData);
+            const { firstName, lastName, email, password, confirmPassword } = req.body;
+            const registerData = await registerValidation.validateAsync({ firstName, lastName, email, password, confirmPassword }, options);
             let user = await User.findOne({ email: registerData.email })
             if (user)
                 throw "Existing email id"
-            const hashedPassword = await bcrypt.hash(password, 10)
-            // const hashedconfirmPassword = await bcrypt.hash(confirmPassword, 10)
+            const hashedPassword = await bcrypt.hash(password, 10);
 
             let roleId = await baseContoller.getRoleId(constants.USER_ROLE, res);
             user = new User({
@@ -31,13 +29,11 @@ class UserController {
                 lastName,
                 email,
                 password: hashedPassword,
-                // confirmPassword: hashedconfirmPassword,
                 roleId
             });
             await user.save();
             generateToken(user, status.SUCCESS, res, constants.USER_ROLE, { message: 'Successfully Registered' })  
         } catch (err) {
-            console.log(err);
             if (err.isJoi === true) {
                 const errors = []
                 err.details.forEach(detail => {
@@ -47,7 +43,6 @@ class UserController {
                     errors.push(error)
                 })
             }
-            console.log("error : ", err)
             return res.status(status.INTERNAL_SERVER_ERROR).json({ error: err })
         }
     }
@@ -56,9 +51,8 @@ class UserController {
     loginUser = async (req, res) => {
         try {
             const { email, password } = req.body;
-            console.log("REQ : ", req.body)
             let options = { abortEarly: false }
-            const loginData = await loginValidation.validateAsync({ email, password }, options)
+            const loginData = await loginValidation.validateAsync({ email, password }, options);
             const user = await User.findOne({ email: loginData.email })
 
             if (!user)
@@ -68,7 +62,6 @@ class UserController {
                 throw "Incorrect password"
             generateToken(user, status.SUCCESS, res, role.name, { message: 'Logged in successfully' })
         } catch (err) {
-            console.log("ERROR : ", err);
             return res.status(status.NOT_FOUND).json({ error: err })
         }
     }
@@ -100,15 +93,13 @@ class UserController {
             let options = { abortEarly: false }
             const updateData = await registerValidation.validateAsync(req.body, options)
             const { firstName, lastName, email } = updateData;
-            // const hashedPassword = await bcrypt.hash(password, 10);
             user = await User.findByIdAndUpdate(id, {
                 firstName,
                 lastName,
                 email,
-                // password: hashedPassword
             })
             user = await user.save()
-            return res.status(status.SUCCESS).json({ message: 'Updated Successfully' })
+            return res.status(status.SUCCESS).json({ message: 'Profile Updated Successfully' })
         } catch (err) {
             return res.status(status.NOT_FOUND).json({ error: err })
         }
@@ -123,7 +114,7 @@ class UserController {
             const user = await User.findByIdAndDelete(id)
             if (!user)
                 throw "Unable to delete the profile"
-            return res.status(status.SUCCESS).json({ message: 'Deleted Successfully' })
+            return res.status(status.SUCCESS).json({ message: 'Profile Deleted Successfully' })
         } catch (err) {
             return res.status(status.NOT_FOUND).json({ error: err })
         }

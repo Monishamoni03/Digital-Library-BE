@@ -9,7 +9,7 @@ class BookingController {
             const allBookings = await Booking.find({}).populate( [{ path : 'book' }, { path : 'user' }])
             res.status(status.SUCCESS).send(allBookings)
         } catch( error ){
-            res.status(status.NOT_FOUND).json({ message : 'No Bookings found'})
+            res.status(status.NOT_FOUND).json({ message : 'No Available Bookings'})
         }
     }
     
@@ -19,7 +19,7 @@ class BookingController {
             const userBookings = await Booking.find({ user : req.params.id }).populate( { path : 'book'})
             res.status(status.SUCCESS).send(userBookings)
         } catch( error ){
-            res.status(status.NOT_FOUND).json({ message : 'No Bookings found'})
+            res.status(status.NOT_FOUND).json({ message : 'No User Bookings found'})
         }
     }
 
